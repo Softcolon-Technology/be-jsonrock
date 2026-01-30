@@ -1,55 +1,29 @@
 import { Request, Response } from 'express';
 import { ShareService } from '../services/share.service';
-import { JsonShareMode } from '../models/share.model';
+import logger from '../config/logger';
 
 const shareService = new ShareService();
 
-// Hack to make TS happy if @types/multer isn't picked up globally immediately
+// Multer types from @types/multer
 interface MulterRequest extends Request {
+    // eslint-disable-next-line no-undef
     file?: Express.Multer.File;
 }
 
 export class ShareController {
-
     async createShare(req: Request, res: Response): Promise<void> {
         try {
-            let { json, mode, isPrivate, accessType, password, type, slug } = req.body;
-
-            if (type === 'text') {
-                json = json || "";
-            }
-
-            if (typeof json !== "string" || (!json.trim() && type !== 'text')) {
-                res.status(400).json({ error: "Invalid payload" });
-                return;
-            }
-
-            // Default mode to visualize if not provided
-            let effectiveMode = mode;
-            if (type === 'text' && !effectiveMode) {
-                effectiveMode = "visualize";
-            }
-
-            if (!effectiveMode || !["visualize", "tree", "formatter"].includes(effectiveMode)) {
-                res.status(400).json({ error: "Invalid mode" });
-                return;
-            }
-
-            const isPrivateFlag = Boolean(isPrivate);
-
-            if (isPrivateFlag && (!password || password.length < 4)) {
-                res.status(400).json({ error: "Password must be at least 4 characters for private links" });
-                return;
-            }
+            // All validation is handled by Joi middleware
+            const { json, mode, isPrivate, accessType, password, type, slug } = req.body;
 
             const record = await shareService.createShareLink({
-                json,
-                mode: effectiveMode,
-                isPrivate: isPrivateFlag,
+                json: json || '',
+                mode,
+                isPrivate: isPrivate || false,
                 accessType,
                 password,
                 type: type || 'json',
-                slug
+                slug,
             });
 
             res.json({
@@ -59,65 +33,55 @@ export class ShareController {
                 isPrivate: record.isPrivate,
                 accessType: record.accessType,
             });
-
         } catch (error) {
-            console.error("Error creating share link", error);
-            res.status(500).json({ error: "Internal server error" });
+            logger.error('Error creating share link', error);
+            res.status(500).json({ error: 'Internal server error' });
         }
     }
 
     async getRawShare(req: Request, res: Response): Promise<void> {
         try {
+            // Validation handled by Joi middleware
             const { slug } = req.params;
             const password = req.query.password as string | undefined;
-
-            if (!slug) {
-                res.status(400).json({ error: "Slug is required" });
-                return;
-            }
 
             const record = await shareService.getShareLink(slug as string);
 
             if (!record) {
-                res.status(404).json({ error: "Not found" });
+                res.status(404).json({ error: 'Not found' });
                 return;
             }
 
             // check password if private
             if (record.isPrivate) {
                 if (!password) {
-                    // If password missing in query, deny raw access
-                    res.status(401).json({ error: "Password is required" });
+                    res.status(401).json({ error: 'Password is required' });
                     return;
                 }
 
                 const isValid = shareService.verifyPassword(record, password);
                 if (!isValid) {
-                    res.status(401).json({ error: "Password is incorrect" });
+                    res.status(401).json({ error: 'Password is incorrect' });
                     return;
                 }
             }
 
             res.json(record.type === 'json' ? JSON.parse(record.json) : record.json);
-
         } catch (error) {
-            console.error("API Error:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            logger.error('API Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
     async getShareMetaData(req: Request, res: Response): Promise<void> {
         try {
+            // Validation handled by Joi middleware
             const { slug } = req.params;
-            if (!slug) {
-                res.status(400).json({ error: "Slug is required" });
-                return;
-            }
 
             const record = await shareService.getShareLink(slug as string);
 
             if (!record) {
-                res.status(404).json({ error: "Not found" });
+                res.status(404).json({ error: 'Not found' });
                 return;
             }
 
@@ -128,7 +92,7 @@ export class ShareController {
                     slug: record.slug,
                     isPrivate: true,
                     accessType: record.accessType,
-                    mode: record.mode
+                    mode: record.mode,
                 });
                 return;
             }
@@ -139,34 +103,29 @@ export class ShareController {
                 slug: record.slug,
                 isPrivate: record.isPrivate,
                 accessType: record.accessType,
-                mode: record.mode
+                mode: record.mode,
             });
-
         } catch (error) {
-            console.error("API Error:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            logger.error('API Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
     async unlockShare(req: Request, res: Response): Promise<void> {
         try {
+            // Validation handled by Joi middleware
             const { slug } = req.params;
             const { password } = req.body;
 
-            if (!password) {
-                res.status(400).json({ error: "Password is required" });
-                return;
-            }
-
             const record = await shareService.getShareLink(slug as string);
             if (!record) {
-                res.status(404).json({ error: "Not found" });
+                res.status(404).json({ error: 'Not found' });
                 return;
             }
 
             const isValid = shareService.verifyPassword(record, password);
             if (!isValid) {
-                res.status(401).json({ error: "Invalid password" });
+                res.status(401).json({ error: 'Invalid password' });
                 return;
             }
 
@@ -176,56 +135,35 @@ export class ShareController {
                 slug: record.slug,
                 isPrivate: record.isPrivate,
                 accessType: record.accessType,
-                mode: record.mode
+                mode: record.mode,
             });
-
         } catch (error) {
-            console.error("Unknown error:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            logger.error('Unknown error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
     async updateShare(req: Request, res: Response): Promise<void> {
         try {
+            // Validation handled by Joi middleware
             const { slug } = req.params;
-            let { json, mode, isPrivate, accessType, password, type } = req.body;
-
-            if (type === 'text') {
-                json = json || "";
-            }
-
-            if (typeof json !== "string" || (!json.trim() && type !== 'text')) {
-                res.status(400).json({ error: "Invalid payload" });
-                return;
-            }
-
-            const effectiveMode = (type === 'text' && !mode) ? 'visualize' : mode;
-
-            if (!effectiveMode || !["visualize", "tree", "formatter"].includes(effectiveMode)) {
-                res.status(400).json({ error: "Invalid mode" });
-                return;
-            }
-
-            const isPrivateFlag = Boolean(isPrivate);
-            if (isPrivateFlag && (!password || password.length < 4)) {
-                res.status(400).json({ error: "Password must be at least 4 characters for private links" });
-                return;
-            }
+            const { json, mode, isPrivate, accessType, password, type } = req.body;
 
             const existing = await shareService.getShareLink(slug as string);
             if (existing) {
-                if (existing.isPrivate && !isPrivateFlag) {
-                    res.status(400).json({ error: "Cannot change a private link to public" });
+                // Business logic validation
+                if (existing.isPrivate && !isPrivate) {
+                    res.status(400).json({ error: 'Cannot change a private link to public' });
                     return;
                 }
 
                 await shareService.updateShareLink(slug as string, {
-                    json,
-                    mode: effectiveMode,
-                    isPrivate: isPrivateFlag,
+                    json: json || '',
+                    mode,
+                    isPrivate: isPrivate || false,
                     accessType,
                     password,
-                    type: type || 'json'
+                    type: type || 'json',
                 });
                 res.json({ success: true, slug });
                 return;
@@ -234,18 +172,17 @@ export class ShareController {
             // Upsert / Create if not exists (fallback)
             await shareService.createShareLink({
                 slug: slug as string,
-                json,
-                mode: effectiveMode,
-                isPrivate: isPrivateFlag,
+                json: json || '',
+                mode,
+                isPrivate: isPrivate || false,
                 accessType: accessType || 'editor',
                 password,
-                type: type || 'json'
+                type: type || 'json',
             });
             res.json({ success: true, slug, created: true });
-
         } catch (error) {
-            console.error("API Error:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            logger.error('API Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
@@ -254,13 +191,13 @@ export class ShareController {
             const file = (req as MulterRequest).file;
 
             if (!file) {
-                res.status(400).json({ error: "No file provided" });
+                res.status(400).json({ error: 'No file provided' });
                 return;
             }
 
             // size check handled by multer limits, but safe double check
             if (file.size > 2 * 1024 * 1024) {
-                res.status(413).json({ error: "File size exceeds 2MB limit" });
+                res.status(413).json({ error: 'File size exceeds 2MB limit' });
                 return;
             }
 
@@ -270,7 +207,7 @@ export class ShareController {
             try {
                 JSON.parse(text);
             } catch {
-                res.status(400).json({ error: "Invalid JSON file" });
+                res.status(400).json({ error: 'Invalid JSON file' });
                 return;
             }
 
@@ -279,14 +216,13 @@ export class ShareController {
                 mode: 'visualize', // Default or could be inferred
                 isPrivate: false,
                 accessType: 'editor',
-                type: 'json'
+                type: 'json',
             });
 
             res.json({ slug: record.slug });
-
         } catch (error) {
-            console.error("Upload API Error:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            console.error('Upload API Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 }

@@ -6,8 +6,9 @@ import { Server } from 'socket.io';
 import { connectDB } from './db/conn';
 import shareRoutes from './routes/share.routes';
 import morgan from 'morgan';
-
-
+import logger from './config/logger';
+import globalErrorHandler from './middleware/errorLogger';
+import notFoundHandler from './middleware/notFound';
 
 dotenv.config();
 
@@ -25,34 +26,33 @@ app.use('/api', shareRoutes);
 connectDB();
 
 const io = new Server(httpServer, {
-    path: "/api/socket/io",
+    path: '/api/socket/io',
     addTrailingSlash: false,
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
 });
 
-io.on("connection", (socket) => {
+io.on('connection', (socket) => {
     // console.log("New client connected", socket.id);
 
-    socket.on("join-room", (slug: string) => {
+    socket.on('join-room', (slug: string) => {
         socket.join(slug);
         // console.log(`Client ${socket.id} joined room ${slug}`);
     });
 
-
-    socket.on("code-change", (data: { slug: string; newCode: string }) => {
+    socket.on('code-change', (data: { slug: string; newCode: string }) => {
         // Broadcast to everyone ELSE in the room
-        socket.to(data.slug).emit("code-change", data.newCode);
+        socket.to(data.slug).emit('code-change', data.newCode);
     });
 
-    socket.on("leave-room", (slug: string) => {
+    socket.on('leave-room', (slug: string) => {
         socket.leave(slug);
         // console.log(`Client ${socket.id} left room ${slug}`);
     });
 
-    socket.on("disconnect", () => {
+    socket.on('disconnect', () => {
         // console.log("Client disconnected", socket.id);
     });
 });
@@ -61,6 +61,26 @@ app.get('/', (req: Request, res: Response) => {
     res.send('JSON Cracker Backend is running!');
 });
 
+// 404 handler 
+app.use(notFoundHandler);
+
+// Global error handler 
+app.use(globalErrorHandler);
+
+process.on('uncaughtException', (error: Error) => {
+    logger.error('Uncaught Exception', {
+        message: error.message,
+        stack: error.stack,
+    });
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: unknown) => {
+    logger.error('Unhandled Promise Rejection', {
+        reason,
+    });
+});
+
 httpServer.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    logger.info(`Server is running on http://localhost:${PORT}`);
 });
