@@ -1,0 +1,36 @@
+name: Node.js CI/CD for Main Branch [Jsonrock Backend Softcolon]
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: jsonrock prod
+    environment: production
+    env:
+      PORT: 3008
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Application
+        run: pnpm build
+
+      # - name: Restart Application with PM2
+      #   run: pm2 restart ecosystem.config.js --only jsonrock-prod --update-env
