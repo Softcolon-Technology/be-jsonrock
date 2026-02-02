@@ -1,5 +1,0 @@
-{"level":"info","message":"Server is running on http://localhost:3005","service":"backend-service","timestamp":"2026-02-02 10:55:46"}
-{"level":"info","message":"mongodb database connected successfully","service":"backend-service","timestamp":"2026-02-02 10:55:47"}
-{"errors":["Body: \"password\" is not allowed to be empty"],"level":"warn","message":"Validation failed","method":"PUT","path":"/share/4cWLrtT6","service":"backend-service","timestamp":"2026-02-02 11:03:52"}
-{"level":"info","message":"Server is running on http://localhost:3005","service":"backend-service","timestamp":"2026-02-02 11:06:42"}
-{"level":"info","message":"mongodb database connected successfully","service":"backend-service","timestamp":"2026-02-02 11:06:43"}
