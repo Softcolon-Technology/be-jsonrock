@@ -2,8 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'be-jsonrock-prod',
-      script: 'pnpm',
-      args: 'run start',
+      script: 'dist/index.js',
       env: {
         ...process.env,
         PORT: 3008,
@@ -11,8 +10,7 @@ module.exports = {
     },
     {
       name: 'be-jsonrock-dev',
-      script: 'pnpm',
-      args: 'run start',
+      script: 'dist/index.js',
       env: {
         ...process.env,
         PORT: 3009,
