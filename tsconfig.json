@@ -17,5 +17,12 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "commitlint.config.ts",
+    "commitlint-custom-rules.js"
+  ]
 }
