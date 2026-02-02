@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: jsonrock prod
+    runs-on: be-jsonrock prod
     environment: production
     env:
       PORT: 3008
