@@ -7,11 +7,6 @@ on:
 jobs:
   build:
     runs-on: be-jsonrock prod
-    environment: production
-    env:
-      PORT: 3008
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      NODE_ENV: ${{ secrets.NODE_ENV }}
 
     steps:
       - name: Checkout code
@@ -25,6 +20,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Add Envrionemnt Variables
+        run: cp /home/ankit/projects/be-jsonrock/.env .env
+
       - name: Install Dependencies
         run: pnpm install
 
@@ -32,4 +30,4 @@ jobs:
         run: pnpm build
 
       - name: Restart Application with PM2
-        run: pm2 restart ecosystem.config.js --only be-jsonrock-prod --update-env
+        run: pm2 restart be-jsonrock-prod
