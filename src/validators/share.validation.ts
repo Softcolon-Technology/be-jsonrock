@@ -1,8 +1,7 @@
 import Joi from 'joi'
 
 // Common reusable schemas
-const slugSchema = Joi.string().min(6).max(20).required().messages({
-  'string.min': 'Slug must be at least 6 characters',
+const slugSchema = Joi.string().max(20).required().messages({
   'string.max': 'Slug must not exceed 20 characters',
 })
 
@@ -43,7 +42,7 @@ export const createShareSchema = {
         'any.required': 'Password is required for private links',
       }),
     type: typeSchema,
-    slug: Joi.string().alphanum().min(6).max(20).optional(),
+    slug: Joi.string().max(20).optional(),
   }),
 }
 
