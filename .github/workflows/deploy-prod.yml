@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: 'pnpm'
 
       - name: Enable Corepack
         run: corepack enable
@@ -29,5 +30,5 @@ jobs:
       - name: Build Application
         run: pnpm build
 
-      - name: Restart Application with PM2
-        run: pm2 restart be-jsonrock-prod
+      # - name: Restart Application with PM2
+      #   run: pm2 restart be-jsonrock-prod
