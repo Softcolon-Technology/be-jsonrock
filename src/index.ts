@@ -61,15 +61,15 @@ function checkRateLimit(socketId: string): boolean {
   return true
 }
 
-// CRITICAL FIX #2: Cleanup rate limit map to prevent memory leak
-setInterval(() => {
-  const now = Date.now()
-  for (const [socketId, entry] of rateLimitMap.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitMap.delete(socketId)
-    }
-  }
-}, 60000) // Cleanup every minute
+// // CRITICAL FIX #2: Cleanup rate limit map to prevent memory leak
+// setInterval(() => {
+//   const now = Date.now()
+//   for (const [socketId, entry] of rateLimitMap.entries()) {
+//     if (now > entry.resetTime) {
+//       rateLimitMap.delete(socketId)
+//     }
+//   }
+// }, 60000) // Cleanup every minute
 
 io.on('connection', (socket) => {
   // console.log("New client connected", socket.id);
