@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import { AccessTypeEnum, ModeEnum, ShareTypeEnum } from '../enums/enum'
 
 // Common reusable schemas
 const slugSchema = Joi.string().max(20).required().messages({
@@ -7,20 +8,20 @@ const slugSchema = Joi.string().max(20).required().messages({
 
 const modeSchema = Joi.string()
   .when('type', {
-    is: 'json',
-    then: Joi.valid('visualize', 'tree', 'formatter').required().messages({
+    is: ShareTypeEnum.JSON,
+    then: Joi.valid(...Object.values(ModeEnum)).required().messages({
       'any.only': 'Mode must be one of: visualize, tree, formatter',
     }),
     otherwise: Joi.optional().allow(null, ""),
   })
 
-const typeSchema = Joi.string().valid('json', 'text').default('json').messages({
+const typeSchema = Joi.string().valid(...Object.values(ShareTypeEnum)).default(ShareTypeEnum.JSON).messages({
   'any.only': 'Type must be either json or text',
 })
 
 const accessTypeSchema = Joi.string()
-  .valid('editor', 'viewer')
-  .default('viewer')
+  .valid(...Object.values(AccessTypeEnum))
+  .default(AccessTypeEnum.VIEWER)
   .messages({
     'any.only': 'Access type must be either editor or viewer',
   })

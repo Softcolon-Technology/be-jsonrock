@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { ShareService } from '../services/share.service'
 import logger from '../config/logger'
+import { ShareTypeEnum, ModeEnum, AccessTypeEnum } from '../enums/enum'
 
 const shareService = new ShareService()
 
@@ -23,7 +24,7 @@ export class ShareController {
         isPrivate: isPrivate || false,
         accessType,
         password,
-        type: type || 'json',
+        type: type || ShareTypeEnum.JSON,
         slug,
       })
 
@@ -67,7 +68,7 @@ export class ShareController {
         }
       }
 
-      res.json(record.type === 'json' ? JSON.parse(record.json) : record.json)
+      res.json(record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json)
     } catch (error) {
       logger.error('API Error:', error)
       res.status(500).json({ error: 'Internal Server Error' })
@@ -100,7 +101,7 @@ export class ShareController {
 
       res.json({
         type: record.type,
-        data: record.type === 'json' ? JSON.parse(record.json) : record.json,
+        data: record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json,
         slug: record.slug,
         isPrivate: record.isPrivate,
         accessType: record.accessType,
@@ -132,7 +133,7 @@ export class ShareController {
 
       res.json({
         type: record.type,
-        data: record.type === 'json' ? JSON.parse(record.json) : record.json,
+        data: record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json,
         slug: record.slug,
         isPrivate: record.isPrivate,
         accessType: record.accessType,
@@ -166,7 +167,7 @@ export class ShareController {
           isPrivate: isPrivate || false,
           accessType,
           password,
-          type: type || 'json',
+          type: type || ShareTypeEnum.JSON,
         })
         res.json({ success: true, slug })
         return
@@ -178,9 +179,9 @@ export class ShareController {
         json: json || '',
         mode,
         isPrivate: isPrivate || false,
-        accessType: accessType || 'editor',
+        accessType: accessType || AccessTypeEnum.EDITOR,
         password,
-        type: type || 'json',
+        type: type || ShareTypeEnum.JSON,
       })
       res.json({ success: true, slug, created: true })
     } catch (error) {
@@ -216,10 +217,10 @@ export class ShareController {
 
       const record = await shareService.createShareLink({
         json: text,
-        mode: 'visualize', // Default or could be inferred
+        mode: ModeEnum.VISUALIZE, // Default or could be inferred
         isPrivate: false,
-        accessType: 'editor',
-        type: 'json',
+        accessType: AccessTypeEnum.EDITOR,
+        type: ShareTypeEnum.JSON,
       })
 
       res.json({ slug: record.slug })
