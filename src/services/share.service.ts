@@ -9,7 +9,7 @@ import { createHash, timingSafeEqual } from 'crypto'
 
 interface CreateShareInput {
   json?: string
-  mode: JsonShareMode
+  mode?: JsonShareMode
   isPrivate: boolean
   accessType?: ShareAccessType
   password?: string
@@ -41,7 +41,7 @@ export class ShareService {
       slug,
       type: input.type || 'json',
       json: input.json || '',
-      mode: input.mode,
+      mode: input.mode || 'formatter',
       isPrivate: input.isPrivate,
       accessType: input.accessType || 'viewer',
       passwordHash,

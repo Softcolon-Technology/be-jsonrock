@@ -6,10 +6,12 @@ const slugSchema = Joi.string().max(20).required().messages({
 })
 
 const modeSchema = Joi.string()
-  .valid('visualize', 'tree', 'formatter')
-  .required()
-  .messages({
-    'any.only': 'Mode must be one of: visualize, tree, formatter',
+  .when('type', {
+    is: 'json',
+    then: Joi.valid('visualize', 'tree', 'formatter').required().messages({
+      'any.only': 'Mode must be one of: visualize, tree, formatter',
+    }),
+    otherwise: Joi.optional().allow(null, ""),
   })
 
 const typeSchema = Joi.string().valid('json', 'text').default('json').messages({
