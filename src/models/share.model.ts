@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose'
+import { ModeEnum, AccessTypeEnum, ShareTypeEnum } from '../enums/enum'
 
 export type JsonShareMode = 'visualize' | 'tree' | 'formatter'
 export type ShareAccessType = 'editor' | 'viewer'
@@ -19,15 +20,15 @@ export interface IShareLink extends Document {
 const ShareLinkSchema: Schema = new Schema(
   {
     slug: { type: String, required: true, unique: true },
-    type: { type: String, enum: ['json', 'text'], default: 'json' },
+    type: { type: String, enum: ShareTypeEnum, default: ShareTypeEnum.JSON },
     json: { type: String },
     mode: {
       type: String,
-      enum: ['visualize', 'tree', 'formatter'],
+      enum: ModeEnum,
       required: true,
     },
     isPrivate: { type: Boolean, default: false },
-    accessType: { type: String, enum: ['editor', 'viewer'], default: 'viewer' },
+    accessType: { type: String, enum: AccessTypeEnum, default: AccessTypeEnum.VIEWER },
     passwordHash: { type: String },
   },
   { timestamps: true }

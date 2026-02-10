@@ -34,6 +34,43 @@ const io = new Server(httpServer, {
   },
 })
 
+// CRITICAL FIX #1: Add Rate Limiter to prevent spam
+interface RateLimitEntry {
+  count: number
+  resetTime: number
+}
+
+const rateLimitMap = new Map<string, RateLimitEntry>()
+const RATE_LIMIT_POINTS = 10 // 10 messages per second
+const RATE_LIMIT_DURATION = 1000 // 1 second
+
+function checkRateLimit(socketId: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitMap.get(socketId)
+
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(socketId, { count: 1, resetTime: now + RATE_LIMIT_DURATION })
+    return true
+  }
+
+  if (entry.count >= RATE_LIMIT_POINTS) {
+    return false // Rate limit exceeded
+  }
+
+  entry.count++
+  return true
+}
+
+// // CRITICAL FIX #2: Cleanup rate limit map to prevent memory leak
+// setInterval(() => {
+//   const now = Date.now()
+//   for (const [socketId, entry] of rateLimitMap.entries()) {
+//     if (now > entry.resetTime) {
+//       rateLimitMap.delete(socketId)
+//     }
+//   }
+// }, 60000) // Cleanup every minute
+
 io.on('connection', (socket) => {
   // console.log("New client connected", socket.id);
 
@@ -43,6 +80,13 @@ io.on('connection', (socket) => {
   })
 
   socket.on('code-change', (data: { slug: string; newCode: string }) => {
+    // CRITICAL FIX #3: Add rate limiting to code-change events
+    if (!checkRateLimit(socket.id)) {
+      // console.log(`Rate limit exceeded for ${socket.id}`);
+      socket.emit('error', { message: 'Too many updates. Please slow down.' })
+      return
+    }
+
     // Broadcast to everyone ELSE in the room
     socket.to(data.slug).emit('code-change', data.newCode)
   })
@@ -53,6 +97,8 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', () => {
+    // CRITICAL FIX #4: Cleanup rate limit entry on disconnect
+    rateLimitMap.delete(socket.id)
     // console.log("Client disconnected", socket.id);
   })
 })

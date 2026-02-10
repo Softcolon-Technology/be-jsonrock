@@ -6,10 +6,11 @@ import ShareLink, {
 } from '../models/share.model'
 import { generateSlug } from '../utils/slug.utils'
 import { createHash, timingSafeEqual } from 'crypto'
+import { ModeEnum, AccessTypeEnum, ShareTypeEnum } from '../enums/enum'
 
 interface CreateShareInput {
   json?: string
-  mode: JsonShareMode
+  mode?: JsonShareMode
   isPrivate: boolean
   accessType?: ShareAccessType
   password?: string
@@ -39,11 +40,11 @@ export class ShareService {
 
     const shareLink = new ShareLink({
       slug,
-      type: input.type || 'json',
+      type: input.type || ShareTypeEnum.JSON,
       json: input.json || '',
-      mode: input.mode,
+      mode: input.mode || ModeEnum.FORMATTER,
       isPrivate: input.isPrivate,
-      accessType: input.accessType || 'viewer',
+      accessType: input.accessType || AccessTypeEnum.VIEWER,
       passwordHash,
     })
 
@@ -62,7 +63,7 @@ export class ShareService {
       json: input.json,
       mode: input.mode,
       isPrivate: input.isPrivate,
-      accessType: input.accessType || 'viewer',
+      accessType: input.accessType || AccessTypeEnum.VIEWER,
     }
 
     if (input.type) {

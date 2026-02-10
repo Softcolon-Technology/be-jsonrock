@@ -1,25 +1,27 @@
 import Joi from 'joi'
+import { AccessTypeEnum, ModeEnum, ShareTypeEnum } from '../enums/enum'
 
 // Common reusable schemas
-const slugSchema = Joi.string().min(6).max(20).required().messages({
-  'string.min': 'Slug must be at least 6 characters',
+const slugSchema = Joi.string().max(20).required().messages({
   'string.max': 'Slug must not exceed 20 characters',
 })
 
 const modeSchema = Joi.string()
-  .valid('visualize', 'tree', 'formatter')
-  .required()
-  .messages({
-    'any.only': 'Mode must be one of: visualize, tree, formatter',
+  .when('type', {
+    is: ShareTypeEnum.JSON,
+    then: Joi.valid(...Object.values(ModeEnum)).required().messages({
+      'any.only': 'Mode must be one of: visualize, tree, formatter',
+    }),
+    otherwise: Joi.optional().allow(null, ""),
   })
 
-const typeSchema = Joi.string().valid('json', 'text').default('json').messages({
+const typeSchema = Joi.string().valid(...Object.values(ShareTypeEnum)).default(ShareTypeEnum.JSON).messages({
   'any.only': 'Type must be either json or text',
 })
 
 const accessTypeSchema = Joi.string()
-  .valid('editor', 'viewer')
-  .default('viewer')
+  .valid(...Object.values(AccessTypeEnum))
+  .default(AccessTypeEnum.VIEWER)
   .messages({
     'any.only': 'Access type must be either editor or viewer',
   })
@@ -43,7 +45,7 @@ export const createShareSchema = {
         'any.required': 'Password is required for private links',
       }),
     type: typeSchema,
-    slug: Joi.string().alphanum().min(6).max(20).optional(),
+    slug: Joi.string().max(20).optional(),
   }),
 }
 
