@@ -28,4 +28,7 @@ jobs:
         run: pnpm install
 
       - name: Build Application
-        run: npm run build
+        run: pnpm build
+
+      - name: Restart Application with PM2
+        run: pm2 restart be-jsonrock-dev
