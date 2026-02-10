@@ -28,7 +28,11 @@ const ShareLinkSchema: Schema = new Schema(
       required: true,
     },
     isPrivate: { type: Boolean, default: false },
-    accessType: { type: String, enum: AccessTypeEnum, default: AccessTypeEnum.VIEWER },
+    accessType: {
+      type: String,
+      enum: AccessTypeEnum,
+      default: AccessTypeEnum.VIEWER,
+    },
     passwordHash: { type: String },
   },
   { timestamps: true }

@@ -49,7 +49,10 @@ function checkRateLimit(socketId: string): boolean {
   const entry = rateLimitMap.get(socketId)
 
   if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(socketId, { count: 1, resetTime: now + RATE_LIMIT_DURATION })
+    rateLimitMap.set(socketId, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_DURATION,
+    })
     return true
   }
 

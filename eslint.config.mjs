@@ -30,8 +30,9 @@ export default [
     rules: {
       // TypeScript specific rules for safety
       '@typescript-eslint/no-explicit-any': 'warn',
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
-        'off',
+        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',

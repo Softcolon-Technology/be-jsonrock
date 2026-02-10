@@ -68,7 +68,11 @@ export class ShareController {
         }
       }
 
-      res.json(record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json)
+      res.json(
+        record.type === ShareTypeEnum.JSON
+          ? JSON.parse(record.json)
+          : record.json
+      )
     } catch (error) {
       logger.error('API Error:', error)
       res.status(500).json({ error: 'Internal Server Error' })
@@ -101,7 +105,10 @@ export class ShareController {
 
       res.json({
         type: record.type,
-        data: record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json,
+        data:
+          record.type === ShareTypeEnum.JSON
+            ? JSON.parse(record.json)
+            : record.json,
         slug: record.slug,
         isPrivate: record.isPrivate,
         accessType: record.accessType,
@@ -133,7 +140,10 @@ export class ShareController {
 
       res.json({
         type: record.type,
-        data: record.type === ShareTypeEnum.JSON ? JSON.parse(record.json) : record.json,
+        data:
+          record.type === ShareTypeEnum.JSON
+            ? JSON.parse(record.json)
+            : record.json,
         slug: record.slug,
         isPrivate: record.isPrivate,
         accessType: record.accessType,
