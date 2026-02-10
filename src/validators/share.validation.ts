@@ -81,7 +81,7 @@ export const updateShareSchema = {
       .when('isPrivate', {
         is: true,
         then: Joi.required(),
-        otherwise: Joi.optional().allow(null, ""),
+        otherwise: Joi.optional().allow(null, ''),
       })
       .messages({
         'string.min': 'Password must be at least 4 characters',
