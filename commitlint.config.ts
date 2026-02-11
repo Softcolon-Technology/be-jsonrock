@@ -1,6 +1,6 @@
-const customRules = require('./commitlint-custom-rules')
+import customRules from './commitlint-custom-rules'
 
-module.exports = {
+export default {
   extends: ['@commitlint/config-conventional'],
   plugins: [
     {
